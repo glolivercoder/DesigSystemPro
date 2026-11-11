@@ -387,3 +387,4 @@ export function generateGoogleCalendarIcs(campaigns: ScheduledPostItem[]): strin
   ics += "END:VCALENDAR";
   return ics;
 }
+
