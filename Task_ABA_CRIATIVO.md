@@ -1,6 +1,6 @@
-# Task ABA CRIATIVO: Studio de Criativos, Redes Sociais, SEO & Scroll-Craft
+# Task ABA CRIATIVO: Canva Clone Studio, Redes Sociais, Figma & Penpot Converter
 
-Este documento detalha o planejamento, arquitetura técnica, status de implementação e progresso percentual dos módulos que compõem a nova aba **"Criativos"** e as integrações dos repositórios [`scroll-craft`](https://github.com/nateherkai/scroll-craft) e [`humanizer`](https://github.com/blader/humanizer), além do motor SEO e do importador de templates OpenDesign/Figma.
+Este documento detalha o planejamento, arquitetura técnica, status de implementação e testes do **Criativo Studio (Clone Canva)**, com suporte completo a posts e carrosséis para Instagram e Facebook, thumbnails para YouTube, vídeos verticais para YouTube Shorts e TikTok, conversor de formatos Figma/Penpot e integrações com [`humanizer`](https://github.com/blader/humanizer) e [`scroll-craft`](https://github.com/nateherkai/scroll-craft).
 
 ---
 
@@ -8,121 +8,71 @@ Este documento detalha o planejamento, arquitetura técnica, status de implement
 
 | Módulo | Escopo & Responsabilidade | Progresso | Status |
 | :--- | :--- | :---: | :---: |
-| **M1: Creative Canvas Studio** | Editor visual de posts, stories, reels e banners para Instagram & Facebook com exportação | 100% | ✅ Concluído |
-| **M2: Agendador Social & Melhores Horários** | Calendário inteligente com cálculo de picos de engajamento por público-alvo (B2B, E-commerce, Luxo, etc.) | 100% | ✅ Concluído |
-| **M3: SEO Engine & Structured Data** | Geração automática de OpenGraph, Twitter Cards, Meta tags e Schemas JSON-LD (Product, FAQ, Org) | 100% | ✅ Concluído |
-| **M4: Humanizer Engine (`blader/humanizer`)** | Remoção de vícios de IA, humanização de copy para sites e anúncios, tom autêntico e persuasivo | 100% | ✅ Concluído |
-| **M5: Scroll-Craft Engine (`nateherkai/scroll-craft`)** | Demonstração interativa de produtos com scrollytelling, pinned stages, scrub de timeline e gramáticas imersivas | 100% | ✅ Concluído |
-| **M6: OpenDesign & Figma Batch Importer** | Importador em lote de templates da comunidade Figma, vetores SVG e JSON de design tokens | 100% | ✅ Concluído |
-| **M7: Integração na Aba Principal & Categorias** | Nova vertical "Scroll-Craft & Demonstrativos" no catálogo do Studio com 10 design systems e skills | 100% | ✅ Concluído |
+| **M1: Canva Clone Studio UI** | Interface idêntica ao Canva: Header superior com gradiente roxo, dock lateral de ícones (72px), bandeja retrátil de ferramentas (350px), prancha central com zoom e régua inferior | 100% | ✅ Concluído |
+| **M2: Formatos Multi-Plataforma** | Instagram Post (1080×1080), Carrossel multi-slides, Story/Reels (1080×1920), Facebook (1200×630), YouTube Thumbnail (1280×720), YouTube Shorts (1080×1920), TikTok (1080×1920) | 100% | ✅ Concluído |
+| **M3: Templates Ricos Pré-Carregados** | Template idêntico ao print do Canva ("Somos Pet Friendly"), Carrossel viral de 4 slides, YouTube Thumbnails de tecnologia, Shorts/TikTok com gancho viral, Luxo/Joias | 100% | ✅ Concluído |
+| **M4: Conversor Figma & Penpot** | Importador e conversor de pranchas vetoriais SVG e JSON do Penpot e Figma Community para elementos nativos, e exportador para `.svg` Penpot e tokens W3C | 100% | ✅ Concluído |
+| **M5: Gestão de Carrossel & Slides** | Linha do tempo de slides (Capa, Dica 1, Dica 2, Fechamento), botão "+ Adicionar página", duplicação e ordenação de páginas | 100% | ✅ Concluído |
+| **M6: Humanizer IA no Canvas** | Botão mágico de 1 clique para retirar clichês e termos artificiais de IA em todos os títulos, textos e badges da arte usando `blader/humanizer` | 100% | ✅ Concluído |
+| **M7: Kit de Marca & Design System Sync** | Sincronização automática com a paleta, tipografia e tokens do Design System ativo no estúdio principal | 100% | ✅ Concluído |
+| **M8: Agenda & Picos de Engajamento** | Heatmap e agendador com horários nobres de postagem calculados por vertical de público | 100% | ✅ Concluído |
 
-**Status Geral**: **100% dos Módulos Desenvolvidos e Integrados** 🚀
-
----
-
-## 🧱 Detalhamento dos Módulos e Testes
-
-### M1: Creative Canvas Studio (Instagram & Facebook)
-- **Formatos suportados**:
-  - Feed Instagram Quadrado (`1080x1080` - 1:1)
-  - Feed Facebook / Anúncio Horizontal (`1200x628` - 1.91:1)
-  - Instagram Stories & Reels (`1080x1920` - 9:16)
-  - Carrossel de Lançamento (`1080x1080` multi-slide)
-- **Capacidades Visuais**:
-  - Camadas editáveis: Headline, Subtítulo, Preço/Tag promocional, Badge de urgência, Mockup do produto, Call to Action.
-  - Paletas de cor sincronizadas com o Design System ativo.
-  - Exportação em tempo real (HTML/Canvas para PNG/SVG).
-- **Testes**:
-  - [x] Renderização de canvas nos 4 formatos padrão.
-  - [x] Sincronização de texto e cores ao vivo.
-  - [x] Download do criativo em imagem.
+**Status Geral**: **100% dos Módulos Desenvolvidos, Testados e Operacionais** 🚀
 
 ---
 
-### M2: Agendador Social & Melhores Horários
-- **Cálculo de Pico de Engajamento por Nicho**:
-  - *E-commerce & Acessórios*: Terça e Quinta às 19:00 - 21:00; Domingo às 20:00.
-  - *Joias & Luxo*: Quarta e Sexta às 12:30 e 18:30; Sábado às 11:00.
-  - *Tech & Portfólio B2B*: Terça a Quinta às 08:30 e 14:00.
-  - *Infantil & Família*: Segunda a Quarta às 14:30 e 20:30.
-  - *Beleza & Cosméticos*: Quarta e Sexta às 18:00; Sábado às 15:00.
-- **Painel de Agendamento**:
-  - Visualização semanal com slots recomendados.
-  - Integração visual com canais Meta (Instagram Feed, Stories, Facebook Page).
-  - Status de postagem: Rascunho, Agendado, Publicado.
-- **Testes**:
-  - [x] Cálculo dinâmico de horários baseado na vertical escolhida.
-  - [x] Criação e alteração de agendamentos no estado.
+## 🧱 Arquitetura e Especificações Técnicas
+
+### 1. Interface Clone Canva
+- **Header Superior**:
+  - Logo gradiente Canva C, seletor de formato ativo com ícone e dimensões, título editável do documento, status de salvamento em nuvem (`☁️ Salvo automaticamente`), botão "✦ Humanizar Cópias" e botão primário "Compartilhar / Baixar".
+- **Dock Lateral (72px)**:
+  - `Modelos` (🎨), `Elementos` (🧩), `Texto` (🔤), `Marca` (💎), `Uploads` (📤), `Carrossel` (📑), `Formatos` (📐), `Figma/Penpot` (🌐), `IA Redes` (⚡).
+- **Bandeja Secundária Retrátil (350px)**:
+  - Busca inteligente, chips de filtro rápido (Pet Friendly, Carrossel, YouTube, Shorts, Figma, Penpot), cartões visuais dos modelos, paletas de marca, área de upload e conversor de código.
+- **Prancha Central (Desk)**:
+  - Fundo cinza suave `#181a20`, prancha com sombra profunda `box-shadow: 0 20px 50px rgba(0,0,0,0.6)`, handles de seleção nos 4 cantos, barra flutuante de ações de página (Duplicar, Excluir) e botão centralizado `+ Adicionar página`.
+- **Régua Inferior**:
+  - Atalhos para notas e temporizador, controle deslizante de zoom (20% a 120%) com botão "Ajustar" (48%), indicador de páginas (`Páginas 1/N`), modo grade e tela cheia.
 
 ---
 
-### M3: SEO Engine & Structured Data
-- **Geração de Metadados**:
-  - Title tag otimizado (50-60 caracteres com intenção e marca).
-  - Meta description com gatilho de ação (145-155 caracteres).
-  - Tags OpenGraph (`og:title`, `og:description`, `og:image`, `og:url`, `og:site_name`, `og:type`).
-  - Twitter Card (`summary_large_image`).
-  - Robôs: `index, follow, max-image-preview:large`.
-- **JSON-LD Schema**:
-  - `Product` (com `offers`, `price`, `availability`, `aggregateRating`).
-  - `Organization` / `LocalBusiness`.
-  - `FAQPage` e `BreadcrumbList`.
-- **SERP Preview**:
-  - Google Search Snippet preview.
-  - Facebook/WhatsApp Link Card preview.
-- **Testes**:
-  - [x] Validação sintática do JSON-LD.
-  - [x] Preview de SERP responsivo.
+### 2. Formatos Pré-Configurados
+
+| Formato | Plataforma | Resolução Base | Proporção | Caso de Uso |
+| :--- | :--- | :--- | :--- | :--- |
+| **Instagram Post** | Instagram / FB | 1080 × 1080 px | 1:1 | Feed quadrado tradicional |
+| **Instagram Carrossel** | Instagram | 1080 × 1080 px | 1:1 | Sequência de 2 a 10 slides contínuos |
+| **Instagram Story & Reels** | Instagram | 1080 × 1920 px | 9:16 | Conteúdo vertical imersivo |
+| **Facebook Post** | Facebook | 1200 × 630 px | 1.91:1 | Anúncios e links patrocinados |
+| **YouTube Thumbnail** | YouTube | 1280 × 720 px | 16:9 | Capa de vídeo com alto contraste e CTR |
+| **YouTube Shorts** | YouTube | 1080 × 1920 px | 9:16 | Capa e visualização de Shorts |
+| **TikTok Vídeo / Capa** | TikTok | 1080 × 1920 px | 9:16 | Formato vertical dinâmico com estética neon |
 
 ---
 
-### M4: Humanizer Engine (`blader/humanizer`)
-- **Regras Implementadas da Skill Humanizer v4.0.0**:
-  - **§1 Eliminação de "Not X but Y"**: Substituição de frases artificiais de contraste duplo.
-  - **§2 Eliminação de Fechamentos Teatrais**: Corte de "That is the real win", "Let that sink in", etc.
-  - **§6 Quebra de Tríades Forçadas**: Evita listas automáticas de 3 adjetivos vazios.
-  - **§8 Redução de Travessões Excessivos (—)**: Troca por pontuação natural humana.
-  - **§14 Expurgador de Palavras Clichês de IA**: Remoção de termos como "delve", "testament", "tapestry", "seamlessly", "revolutionize".
-- **Modos de Tom de Voz**:
-  - *Conversacional Autêntico*
-  - *Editorial & Sofisticado*
-  - *Direto & Comercial*
-  - *Técnico & Factual*
-- **Testes**:
-  - [x] Pipeline de sanitização de texto antes e depois.
-  - [x] Botão "Humanizar Copy" aplicado em 1 clique em qualquer texto gerado.
+### 3. Conversor de Formatos: Figma & Penpot Community
+
+- **Entrada suportada**:
+  - Arquivos SVG do Penpot (`<svg xmlns:penpot="https://penpot.app">`) contendo formas, círculos, pranchas e textos.
+  - JSON de pranchas e nós da comunidade Figma e Penpot.
+  - W3C Design Tokens JSON.
+- **Saída gerada**:
+  - Exportação direta para SVG compatível com pranchas e camadas do Penpot via download (`.svg`).
+  - Exportação de tokens de cores e superfícies no formato W3C para Figma (`.json`).
+  - Renderização direta no HTML5 Canvas para exportação em PNG de alta resolução (`1080x1080`, `1280x720`, `1080x1920`).
 
 ---
 
-### M5: Scroll-Craft Engine (`nateherkai/scroll-craft`)
-- **Conceito Extraído**:
-  - "Scroll is the timeline": animação orientada a rolagem, sem scroll sequestrado.
-  - Gramáticas de página: *Filmic One-Shot*, *Split Stage*, *Live Surface*, *Continuous World*.
-  - Efeitos de demonstração de produto:
-    - Pinned viewport com revelação progressiva de especificações.
-    - Rotação / scrub 360° do produto.
-    - Zoom fotográfico macro com transição suave para detalhes de engenharia.
-    - Efeito de profundidade com iluminação direcional e grain texturizado.
-- **Testes**:
-  - [x] Demonstração interativa de produto com scroll acoplado.
-  - [x] Injeção de componentes Scroll-Craft no preview do template.
+### 4. Checklist de Testes
 
----
-
-### M6: OpenDesign & Figma Community Batch Importer
-- **Compatibilidade**:
-  - Suporte ao formato aberto de tokens W3C / Figma Tokens.
-  - Leitura de múltiplos arquivos em lote (Batch Import de JSON/SVG).
-  - Conversor de layouts da comunidade Figma para seções HTML/Tailwind editáveis.
-- **Testes**:
-  - [x] Upload simulado e extração em lote de templates.
-  - [x] Aplicação instantânea dos templates importados no canvas do Smart Editor.
-
----
-
-### M7: Integração na Aba Principal & Categorias
-- **Nova Categoria no Studio Principal**:
-  - `scroll-craft`: **Demonstrativos de Produto & Scroll Imersivo** (com 10 design systems e skills dedicadas).
-- **Nova Aba "Criativos" na Barra Superior**:
-  - Acesso direto via glyph `❖` ao lado de `Smart Editor`.
-
+- [x] Renderização pixel-perfect do template "Somos Pet Friendly" com faixa laranja, título azul, badge estrela de preço, lista de comodidades e foto.
+- [x] Alternância dinâmica entre todos os 7 formatos com reajuste automático de proporção.
+- [x] Adição, duplicação e exclusão de slides no Carrossel.
+- [x] Arrastar e soltar (drag & drop) de elementos na prancha com seleção e redimensionamento visual.
+- [x] Botão de 1 clique "Humanizar Cópias" aplicando as regras do `blader/humanizer` aos textos da arte.
+- [x] Aplicação instantânea da paleta do Design System selecionado via aba "Marca".
+- [x] Conversão de SVG/JSON de templates Penpot/Figma para elementos nativos editáveis.
+- [x] Download da arte gerada em PNG de alta definição e SVG Penpot.
+- [x] Compilação TypeScript com 0 erros (`npm run typecheck`).
+- [x] Build de produção Next.js Turbopack com 0 erros (`npm run build`).

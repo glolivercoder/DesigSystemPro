@@ -34,3 +34,4 @@
 [submodule "shadcn-ui"]
 	path = shadcn-ui
 	url = https://github.com/shadcn-ui/ui.git
+
