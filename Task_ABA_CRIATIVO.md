@@ -16,6 +16,8 @@ Este documento detalha o planejamento, arquitetura técnica, status de implement
 | **M6: Humanizer IA no Canvas** | Botão mágico de 1 clique para retirar clichês e termos artificiais de IA em todos os títulos, textos e badges da arte usando `blader/humanizer` | 100% | ✅ Concluído |
 | **M7: Kit de Marca & Design System Sync** | Sincronização automática com a paleta, tipografia e tokens do Design System ativo no estúdio principal | 100% | ✅ Concluído |
 | **M8: Agenda & Picos de Engajamento** | Heatmap e agendador com horários nobres de postagem calculados por vertical de público | 100% | ✅ Concluído |
+| **M9: HyperFrames Video Engine** | Animação dinâmica procedural de layouts, timeline de 8s, presets cinemáticos e pipeline exportador FFmpeg 8.0 / WebM | 100% | ✅ Concluído |
+| **M10: Agendamento 📅 Omnichannel** | Sub-aba dedicada com seletor de redes por dropdown, horários nobres dinâmicos, gatilhos de liquidez (Dias 03, 04, 05 e 20), aniversários CRM com cupons/brindes, datas comerciais brasileiras, exportação Google Calendar (.ics RFC 5545) e Postiz API | 100% | ✅ Concluído |
 
 **Status Geral**: **100% dos Módulos Desenvolvidos, Testados e Operacionais** 🚀
 
@@ -64,7 +66,31 @@ Este documento detalha o planejamento, arquitetura técnica, status de implement
 
 ---
 
-### 4. Checklist de Testes
+### 4. HyperFrames & Motion Engine (Vídeos e Animações)
+- **Presets de Movimento**: Gancho Viral (TikTok/Reels), Elegância Suave, Pulso de Oferta (E-Commerce) e Typo Slide.
+- **Exportação Multi-Formato**: Geração de timeline procedural de 8s e exportação para WebM e pipeline FFmpeg 8.0 H.264 / AAC 9:16 vertical.
+- **Player Integrado**: Pré-visualização instantânea no drawer com controles de reprodução e reinício de animação.
+
+---
+
+### 5. Agendamento 📅 Omnichannel & Automação Sazonal
+- **Sub-Aba Primária no Topo de Criativos**: Acesso com 1 clique a `[ 🎨 Canva Studio ]` e `[ Agendamento 📅 ]`.
+- **Seletor de Redes Sociais por Dropdown**: Multi-Disparo Simultâneo, Instagram, Facebook, TikTok e YouTube Shorts com cálculo automático de horário nobre de pico e score de audiência.
+- **Gatilhos de Pagamento (Payday Spikes)**:
+  - Dia 03: Aquecimento Tático (Teaser / Wishlist)
+  - Dia 04: Salário Servidores & Executivos (15% OFF PIX)
+  - Dia 05: 5º Dia Útil Nacional CLT (Maior pico de compras, Frete Grátis + Cupom `SALARIO05`)
+  - Dia 20: Vale Quinzenal / Adiantamento Salarial 40% (Oferta Relâmpago 24h)
+- **CRM de Aniversários de Clientes**: Cupons nominais (ex: `NIVER-MARI25`, `VIP-CAMILA30`) e brindes personalizados.
+- **Aniversário de Relacionamento (Fidelidade)**: Mimos de 1, 2 e 3 anos de casa com cashback em dobro no PIX.
+- **Datas Comerciais Brasileiras**: Dia das Mães, Dia dos Namorados, Dia dos Avós (26/07), Dia dos Pais, Semana do Consumidor, Dia do Cliente, Black Friday Brasil e Natal.
+- **Integração com 1 Clique com o Canvas**: Botão "🎨 Carregar no Canva Studio" que injeta a campanha no editor visual e abre a arte instantaneamente.
+- **Sincronização Google Calendar (.ics)**: Geração e download de arquivo RFC 5545 para importação direta no Google Calendar, Outlook e Apple Calendar.
+- **Despacho Postiz API**: Disparo automatizado multi-canal via endpoint REST `/api/campaigns`.
+
+---
+
+### 6. Checklist de Testes
 
 - [x] Renderização pixel-perfect do template "Somos Pet Friendly" com faixa laranja, título azul, badge estrela de preço, lista de comodidades e foto.
 - [x] Alternância dinâmica entre todos os 7 formatos com reajuste automático de proporção.
@@ -74,5 +100,11 @@ Este documento detalha o planejamento, arquitetura técnica, status de implement
 - [x] Aplicação instantânea da paleta do Design System selecionado via aba "Marca".
 - [x] Conversão de SVG/JSON de templates Penpot/Figma para elementos nativos editáveis.
 - [x] Download da arte gerada em PNG de alta definição e SVG Penpot.
+- [x] Integração e renderização do player HyperFrames com animações procedurais.
+- [x] Sub-aba `Agendamento 📅` ativa com favicon rigorosamente posicionado à direita da palavra.
+- [x] Dropdown de seleção de redes sociais com cálculo dinâmico de horário nobre de pico.
+- [x] Injeção de campanhas de Payday, Aniversários e Feriados no Canva Studio em 1 clique.
+- [x] Exportação de arquivo `.ics` RFC 5545 para sincronização com Google Calendar.
+- [x] Endpoint REST `/api/campaigns` atendendo requisições GET e POST.
 - [x] Compilação TypeScript com 0 erros (`npm run typecheck`).
 - [x] Build de produção Next.js Turbopack com 0 erros (`npm run build`).
