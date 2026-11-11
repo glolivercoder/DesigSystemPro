@@ -16,6 +16,7 @@ import {
   type CanvasPage,
   type CanvaTemplatePreset,
 } from "@/lib/canva-engine";
+import { buildHyperframesProject, type MotionStylePreset } from "@/lib/hyperframes";
 
 interface Props {
   category: Category;
@@ -33,7 +34,8 @@ type DockTab =
   | "carousel"
   | "formats"
   | "figma-penpot"
-  | "social-tools";
+  | "social-tools"
+  | "hyperframes";
 
 export default function CreativesPanel({ category, designSystem, onNotify }: Props) {
   // Active Dock Navigation item
@@ -81,6 +83,12 @@ export default function CreativesPanel({ category, designSystem, onNotify }: Pro
   const [newPostTime, setNewPostTime] = useState("");
   const [newPostPlatform, setNewPostPlatform] = useState<"instagram" | "facebook" | "youtube" | "tiktok">("instagram");
 
+  // HyperFrames & Motion State
+  const [motionStyle, setMotionStyle] = useState<MotionStylePreset>("viral-hook");
+  const [motionDuration, setMotionDuration] = useState(8);
+  const [showMotionPlayer, setShowMotionPlayer] = useState(false);
+  const [motionKey, setMotionKey] = useState(0);
+
   // Canvas DOM container ref for zoom calculation & download
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -89,6 +97,20 @@ export default function CreativesPanel({ category, designSystem, onNotify }: Pro
 
   // Best posting times for current category
   const scheduleData = AUDIENCE_SCHEDULES[category.id] ?? AUDIENCE_SCHEDULES.ecommerce;
+
+  // HyperFrames Project Generation
+  const hyperframesProject = useMemo(() => {
+    return buildHyperframesProject({
+      title: projectTitle,
+      formatId: currentFormatId,
+      durationSeconds: motionDuration,
+      fps: 30,
+      stylePreset: motionStyle,
+      elements: activePage.elements,
+      bgColor: activePage.bgColor,
+      bgGradient: activePage.bgGradient,
+    });
+  }, [projectTitle, currentFormatId, motionDuration, motionStyle, activePage]);
 
   // Filtered Templates
   const filteredTemplates = useMemo(() => {
@@ -573,6 +595,33 @@ export default function CreativesPanel({ category, designSystem, onNotify }: Pro
           </button>
 
           <button
+            onClick={() => {
+              setActiveDock("hyperframes");
+              setIsDrawerOpen(true);
+              setShowMotionPlayer(true);
+              setMotionKey((k) => k + 1);
+              onNotify("Motor HyperFrames ativado! Visualizando timeline de animação...");
+            }}
+            title="Gerar Vídeo e Animação com HyperFrames + FFmpeg 8.0"
+            style={{
+              background: "rgba(239, 68, 68, 0.18)",
+              border: "1px solid rgba(239, 68, 68, 0.4)",
+              color: "#f87171",
+              padding: "6px 14px",
+              borderRadius: 20,
+              fontSize: 12,
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              cursor: "pointer",
+            }}
+          >
+            <span>🎬</span>
+            <span>Vídeo HyperFrames</span>
+          </button>
+
+          <button
             onClick={handleExportPng}
             style={{
               background: "linear-gradient(135deg, #7d2ae8 0%, #00c4cc 100%)",
@@ -794,6 +843,7 @@ export default function CreativesPanel({ category, designSystem, onNotify }: Pro
             { id: "formats", label: "Formatos", icon: "📐" },
             { id: "figma-penpot", label: "Figma/Penpot", icon: "🌐" },
             { id: "social-tools", label: "IA Redes", icon: "⚡" },
+            { id: "hyperframes", label: "HyperFrames", icon: "🎬" },
           ].map((item) => {
             const isActive = activeDock === item.id;
             return (
@@ -1683,6 +1733,182 @@ export default function CreativesPanel({ category, designSystem, onNotify }: Pro
                 </button>
               </div>
             )}
+
+            {/* 10. DRAWER: HYPERFRAMES MOTION & VIDEO STUDIO */}
+            {activeDock === "hyperframes" && (
+              <div style={{ padding: 16 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0, color: "#fff" }}>HyperFrames Motion Studio</h3>
+                  <span style={{ fontSize: 10, background: "#ef4444", color: "#fff", padding: "2px 6px", borderRadius: 4, fontWeight: 800 }}>FFMPEG 8.0</span>
+                </div>
+                <p style={{ fontSize: 11, color: "#94a3b8", margin: "0 0 14px", lineHeight: 1.4 }}>
+                  Converta o criativo atual em um vídeo determinístico (MP4/GIF) com timelines GSAP e aceleração nativa por hardware.
+                </p>
+
+                {/* Preset Motion Style */}
+                <h4 style={{ fontSize: 11, color: "#cbd5e1", margin: "0 0 6px", textTransform: "uppercase" }}>Estilo de Coreografia</h4>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 12 }}>
+                  {[
+                    { id: "viral-hook", label: "🔥 Gancho Viral" },
+                    { id: "editorial", label: "✨ Editorial Suave" },
+                    { id: "ecommerce", label: "🛍️ E-commerce" },
+                    { id: "minimal", label: "⚡ Minimal Clean" },
+                  ].map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => setMotionStyle(preset.id as any)}
+                      style={{
+                        background: motionStyle === preset.id ? "#ef4444" : "#212735",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        color: "#fff",
+                        padding: "6px 8px",
+                        borderRadius: 6,
+                        fontSize: 10.5,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Duration Picker */}
+                <h4 style={{ fontSize: 11, color: "#cbd5e1", margin: "0 0 6px", textTransform: "uppercase" }}>Duração do Vídeo</h4>
+                <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
+                  {[5, 8, 12, 15].map((sec) => (
+                    <button
+                      key={sec}
+                      onClick={() => setMotionDuration(sec)}
+                      style={{
+                        flex: 1,
+                        background: motionDuration === sec ? "#7d2ae8" : "#212735",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        color: "#fff",
+                        padding: "6px 0",
+                        borderRadius: 6,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        textAlign: "center",
+                      }}
+                    >
+                      {sec}s
+                    </button>
+                  ))}
+                </div>
+
+                {/* Main Action: Preview Motion */}
+                <button
+                  onClick={() => {
+                    setShowMotionPlayer(true);
+                    setMotionKey((k) => k + 1);
+                    onNotify("Executando prévia do vídeo com GSAP...");
+                  }}
+                  style={{
+                    width: "100%",
+                    background: "linear-gradient(135deg, #ef4444 0%, #7d2ae8 100%)",
+                    border: "none",
+                    color: "#fff",
+                    padding: 10,
+                    borderRadius: 8,
+                    fontSize: 12,
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                    marginBottom: 10,
+                    boxShadow: "0 4px 14px rgba(239, 68, 68, 0.35)",
+                  }}
+                >
+                  <span>▶</span> Executar Prévia da Animação
+                </button>
+
+                {/* Export Options */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
+                  <button
+                    onClick={() => {
+                      const blob = new Blob([hyperframesProject.fullHtmlDoc], { type: "text/html;charset=utf-8" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `${projectTitle.toLowerCase().replace(/\s+/g, "_")}_hyperframes.html`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      onNotify("Arquivo HTML HyperFrames baixado!");
+                    }}
+                    style={{
+                      background: "#212735",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      color: "#cbd5e1",
+                      padding: 8,
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      textAlign: "center",
+                    }}
+                  >
+                    ⬇ Baixar HTML da Composição (.html)
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(hyperframesProject.ffmpegMp4Command);
+                      onNotify("Comando de renderização FFmpeg 8.0 copiado para a área de transferência!");
+                    }}
+                    style={{
+                      background: "#212735",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      color: "#38bdf8",
+                      padding: 8,
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      textAlign: "center",
+                    }}
+                  >
+                    🎬 Copiar Comando FFmpeg MP4
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(hyperframesProject.ffmpegGifCommand);
+                      onNotify("Comando de conversão de GIF copiado!");
+                    }}
+                    style={{
+                      background: "#212735",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      color: "#a7f3d0",
+                      padding: 8,
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      textAlign: "center",
+                    }}
+                  >
+                    🎞️ Copiar Comando FFmpeg GIF
+                  </button>
+                </div>
+
+                {/* Terminal Commands Preview */}
+                <div style={{ background: "#0b0e14", padding: 10, borderRadius: 6, border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <span style={{ fontSize: 9.5, color: "#64748b", textTransform: "uppercase", display: "block", marginBottom: 4 }}>
+                    Terminal CLI (HyperFrames + FFmpeg 8.0)
+                  </span>
+                  <code style={{ fontSize: 9.5, color: "#10b981", display: "block", wordBreak: "break-all", fontFamily: "monospace" }}>
+                    npx hyperframes render -o video.mp4
+                  </code>
+                  <code style={{ fontSize: 9.5, color: "#94a3b8", display: "block", wordBreak: "break-all", fontFamily: "monospace", marginTop: 4 }}>
+                    ffmpeg -i video.mp4 -vf "fps=15,scale=480:-1" video.gif
+                  </code>
+                </div>
+              </div>
+            )}
           </aside>
         )}
 
@@ -1702,6 +1928,124 @@ export default function CreativesPanel({ category, designSystem, onNotify }: Pro
           }}
           onClick={() => setSelectedElementId(null)}
         >
+          {/* HYPERFRAMES LIVE MOTION PLAYER MODAL / OVERLAY */}
+          {showMotionPlayer && (
+            <div
+              style={{
+                position: "absolute",
+                top: 20,
+                bottom: 20,
+                left: 20,
+                right: 20,
+                background: "rgba(10, 13, 20, 0.95)",
+                backdropFilter: "blur(12px)",
+                borderRadius: 12,
+                border: "1px solid rgba(239, 68, 68, 0.3)",
+                display: "flex",
+                flexDirection: "column",
+                zIndex: 50,
+                boxShadow: "0 25px 60px rgba(0,0,0,0.8)",
+                overflow: "hidden",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Player Top Bar */}
+              <div
+                style={{
+                  height: 48,
+                  background: "#12151e",
+                  borderBottom: "1px solid rgba(255,255,255,0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0 16px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: 16 }}>🎬</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>
+                    HyperFrames Live Player (GSAP 3.12 Determinístico)
+                  </span>
+                  <span style={{ fontSize: 11, background: "#ef4444", color: "#fff", padding: "2px 8px", borderRadius: 4, fontWeight: 800 }}>
+                    {activeFormat.badge} · {motionDuration}s
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <button
+                    onClick={() => setMotionKey((k) => k + 1)}
+                    style={{
+                      background: "#2563eb",
+                      border: "none",
+                      color: "#fff",
+                      padding: "6px 12px",
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <span>↺</span> Replay Animação
+                  </button>
+                  <button
+                    onClick={() => setShowMotionPlayer(false)}
+                    style={{
+                      background: "rgba(255,255,255,0.1)",
+                      border: "none",
+                      color: "#fff",
+                      padding: "6px 10px",
+                      borderRadius: 6,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Fechar ✕
+                  </button>
+                </div>
+              </div>
+
+              {/* Player Stage with Iframe */}
+              <div style={{ flex: 1, display: "grid", placeItems: "center", padding: 20, overflow: "auto" }}>
+                <iframe
+                  key={motionKey}
+                  srcDoc={hyperframesProject.fullHtmlDoc}
+                  title="HyperFrames Motion Preview"
+                  style={{
+                    width: activeFormat.width * 0.45,
+                    height: activeFormat.height * 0.45,
+                    border: "none",
+                    borderRadius: 8,
+                    boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
+                    background: "#000",
+                  }}
+                  sandbox="allow-scripts"
+                />
+              </div>
+
+              {/* Player Bottom Info */}
+              <div
+                style={{
+                  height: 38,
+                  background: "#0c0f17",
+                  borderTop: "1px solid rgba(255,255,255,0.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0 16px",
+                  fontSize: 11,
+                  color: "#94a3b8",
+                }}
+              >
+                <span>Renderização determinística quadro a quadro para MP4/GIF com FFmpeg 8.0</span>
+                <span>Dimensões reais: {activeFormat.width} × {activeFormat.height}px (30 FPS)</span>
+              </div>
+            </div>
+          )}
+
           {/* Canvas Floating Top Actions (Lock, Duplicate, Delete) */}
           <div
             style={{

@@ -1585,3 +1585,100 @@ export function exportToFigmaTokens(page: CanvasPage): string {
     2
   );
 }
+
+export interface HyperframesComposition {
+  html: string;
+  css: string;
+  js: string;
+  fullHtmlDoc: string;
+  durationSeconds: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Converts a CanvasPage into a deterministic HyperFrames HTML+CSS+GSAP composition
+ * ready for instant browser preview and headless MP4 / GIF video rendering via HyperFrames.
+ */
+export function exportToHyperframesComposition(
+  page: CanvasPage,
+  formatId: CanvasFormatId = "ig-post",
+  durationSeconds = 8
+): HyperframesComposition {
+  const format = CANVAS_FORMATS[formatId] || CANVAS_FORMATS["ig-post"];
+  const width = format.width;
+  const height = format.height;
+
+  let elementsHtml = "";
+  let gsapTimelineCode = `  const tl = gsap.timeline();\n`;
+
+  // Background
+  elementsHtml += `  <div class="hf-bg"></div>\n`;
+  gsapTimelineCode += `  tl.from(".hf-bg", { opacity: 0, duration: 0.8, ease: "power2.out" });\n`;
+
+  page.elements.forEach((el, idx) => {
+    const elClass = `hf-el-${idx}`;
+    const rot = el.rotation ? `transform: rotate(${el.rotation}deg);` : "";
+
+    if (el.type === "shape") {
+      const isCircle = el.shapeType === "circle";
+      elementsHtml += `  <div class="${elClass} hf-shape" style="position: absolute; left: ${el.x}px; top: ${el.y}px; width: ${el.width}px; height: ${el.height}px; background: ${el.fill || "#2563eb"}; border-radius: ${isCircle ? "50%" : `${el.borderRadius || 0}px`}; ${rot}"></div>\n`;
+      gsapTimelineCode += `  tl.from(".${elClass}", { scale: 0.8, opacity: 0, duration: 0.6, ease: "back.out(1.4)" }, "-=0.4");\n`;
+    } else if (el.type === "heading" || el.type === "subheading" || el.type === "text") {
+      const isHeading = el.type === "heading";
+      elementsHtml += `  <div class="${elClass} hf-text" style="position: absolute; left: ${el.x}px; top: ${el.y}px; width: ${el.width}px; height: ${el.height}px; color: ${el.color || "#fff"}; font-family: ${el.fontFamily || "Inter, sans-serif"}; font-size: ${el.fontSize || 32}px; font-weight: ${el.fontWeight || "bold"}; text-align: ${el.textAlign || "left"}; line-height: 1.15; ${rot}">${(el.text || "").replace(/\n/g, "<br>")}</div>\n`;
+      gsapTimelineCode += `  tl.from(".${elClass}", { y: ${isHeading ? 50 : 30}, opacity: 0, duration: 0.7, ease: "power3.out" }, "-=0.3");\n`;
+    } else if (el.type === "image") {
+      elementsHtml += `  <div class="${elClass} hf-image" style="position: absolute; left: ${el.x}px; top: ${el.y}px; width: ${el.width}px; height: ${el.height}px; background-image: url('${el.src}'); background-size: cover; background-position: center; border-radius: ${el.borderRadius || 12}px; ${rot}"></div>\n`;
+      gsapTimelineCode += `  tl.from(".${elClass}", { scale: 0.85, opacity: 0, duration: 0.9, ease: "power2.out" }, "-=0.4");\n`;
+      gsapTimelineCode += `  gsap.to(".${elClass}", { scale: 1.05, duration: ${durationSeconds}, ease: "none" });\n`;
+    } else if (el.type === "button" || el.type === "badge" || el.type === "price-tag") {
+      elementsHtml += `  <div class="${elClass} hf-badge" style="position: absolute; left: ${el.x}px; top: ${el.y}px; width: ${el.width}px; height: ${el.height}px; background: ${el.badgeBg || el.fill || "#e05315"}; color: ${el.badgeColor || "#ffffff"}; border-radius: ${el.borderRadius || 12}px; display: grid; place-items: center; font-weight: bold; font-size: ${el.fontSize || 22}px; text-align: center; ${rot}">${(el.text || "").replace(/\n/g, "<br>")}</div>\n`;
+      gsapTimelineCode += `  tl.from(".${elClass}", { scale: 0, opacity: 0, duration: 0.6, ease: "elastic.out(1, 0.6)" }, "-=0.3");\n`;
+    } else if (el.type === "bullet-list") {
+      const items = (el.listItems || []).map((it) => `<li>${el.bulletIcon || "🐾"} ${it}</li>`).join("");
+      elementsHtml += `  <ul class="${elClass} hf-list" style="position: absolute; left: ${el.x}px; top: ${el.y}px; width: ${el.width}px; height: ${el.height}px; color: ${el.color || "#fff"}; font-size: ${el.fontSize || 22}px; font-weight: bold; list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; justify-content: space-around;">${items}</ul>\n`;
+      gsapTimelineCode += `  tl.from(".${elClass} li", { x: -40, opacity: 0, stagger: 0.15, duration: 0.5, ease: "power2.out" }, "-=0.2");\n`;
+    }
+  });
+
+  const css = `
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; background: #000; display: grid; place-items: center; min-height: 100vh; overflow: hidden; font-family: 'Inter', -apple-system, sans-serif; }
+    .hf-container { width: ${width}px; height: ${height}px; position: relative; overflow: hidden; background: ${page.bgGradient || page.bgColor || "#ffffff"}; box-shadow: 0 25px 60px rgba(0,0,0,0.5); }
+    .hf-bg { position: absolute; inset: 0; background: ${page.bgGradient || page.bgColor || "#ffffff"}; }
+  `;
+
+  const fullHtmlDoc = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>HyperFrames Video: ${page.title}</title>
+  <style>
+${css}
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+</head>
+<body>
+  <div class="hf-container">
+${elementsHtml}
+  </div>
+
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+${gsapTimelineCode}
+    });
+  </script>
+</body>
+</html>`;
+
+  return {
+    html: elementsHtml,
+    css,
+    js: gsapTimelineCode,
+    fullHtmlDoc,
+    durationSeconds,
+    width,
+    height,
+  };
+}
