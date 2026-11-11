@@ -1,0 +1,108 @@
+Principais Repositórios de UI/UX Design
+https://share.gemini.google/01X8ja4QxiWg
+Criado com
+Respostas rápidas
+11 de novembro de 2026 às 11:11
+Publicada em 11 de novembro de 2026 às 13:10
+Você disse
+list os  principais e mais baixados repositorios de ui e ux design que contenha design systems  inte…
+list os  principais e mais baixados repositorios de ui e ux design que contenha design systems  integrados
+Estes são os principais repositórios, ecossistemas e bibliotecas de UI/UX design de código aberto que contêm
+Design Systems integrados
+com código de produção e componentes visuais (amplamente utilizados por equipes de engenharia e produto em todo o mundo):
+1.
+shadcn/ui
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+O que é:
+Um dos ecossistemas de UI mais populares da atualidade.
+Ao contrário das bibliotecas tradicionais que são instaladas via gerenciadores de pacotes fechados, o
+shadcn/ui
+fornece componentes acessíveis em que você
+copia e cola o código diretamente
+para dentro do seu projeto.
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
++ 1
+Tecnologia:
+React, Tailwind CSS, Radix UI (primitivos de acessibilidade).
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+Por que se destaca:
+Oferece controle total sobre o código-fonte dos componentes, permitindo personalizações profundas sem travas de versão.
+É a base para dezenas de templates e kits de design modernos.
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+2.
+Ant Design (AntD)
+O que é:
+Um ecossistema de design system empresarial em larga escala criado pelo Alibaba.
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+Tecnologia:
+React, Vue, Angular (portas comunitárias).
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+Por que se destaca:
+É ideal para aplicações corporativas densas, painéis administrativos (
+dashboards
+) e ferramentas internas complexas.
+Possui uma API de theming baseada em CSS-in-JS que permite alterar toda a identidade visual de centenas de componentes a partir de um único arquivo de configuração.
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+3.
+Material Design 3 / MUI (Material UI)
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+O que é:
+A implementação oficial do sistema de design global do Google para a web.
+Tecnologia:
+React, Web Components, Flutter.
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+Por que se destaca:
+Oferece uma biblioteca massiva de componentes prontos para produção que seguem rigorosamente as diretrizes de acessibilidade e os princípios de design do Google, contando com kits oficiais robustos para o Figma.
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+4.
+IBM Carbon Design System
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+O que é:
+O design system open-source oficial da IBM para produtos e experiências digitais corporativas.
+DesignSystems.one
+Tecnologia:
+React, Web Components, Angular, Vue.
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+Por que se destaca:
+É um dos sistemas mais rigorosos em termos de conformidade com acessibilidade (WCAG 2.1 AA) e documentação de padrões de UX, servindo de referência global para grandes corporações.
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+5.
+Microsoft Fluent UI
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+O que é:
+O design system oficial da Microsoft, que unifica a identidade visual do Windows, do Microsoft Teams e do Office na Web.
+Tecnologia:
+React, Web Components.
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+Por que se destaca:
+Seus tokens de design mapeiam diretamente o comportamento nativo de sistemas operacionais, sendo excelente para aplicações corporativas focadas em ambientes Windows.
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+6.
+AWS Cloudscape Design System
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+O que é:
+O design system desenvolvido pela Amazon Web Services (AWS) para criar aplicações em nuvem altamente escaláveis.
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+Tecnologia:
+React, Vue.
+Shadcn UI Templates for SaaS & Landing Pages | ShadcnDeck
+Por que se destaca:
+Focado em fluxos de trabalho densos de infraestrutura de TI, painéis de controle em nuvem e visualizações de dados complexas.
+🔍 Onde explorar e catalogar mais Design Systems?
+Design Systems Repo (
+designsystemsrepo.com
+):
+Um diretório curado em tempo real que cataloga centenas de design systems reais de empresas de tecnologia (como HubSpot, Atlassian, Shopify, Stripe e GitLab).
+DesignSystems.one
+DesignSystems.one (
+designsystems.one
+):
+Uma galeria interativa que analisa dezenas de exemplos do mundo real, detalhando quais frameworks e stacks tecnológicas cada design system utiliza.
+Fazer login
+O Gemini pode apresentar informações imprecisas, inclusive sobre pessoas. Por isso, cheque as respostas.
+Política de Privacidade do Google
+Abre em uma nova janela
+Termos de Serviço do Google
+Abre em uma nova janela
+Sua privacidade e os apps do Gemini
+Abre em uma nova janela

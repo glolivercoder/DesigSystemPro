@@ -1,0 +1,36 @@
+[submodule "ant-design"]
+	path = ant-design
+	url = https://github.com/ant-design/ant-design.git
+[submodule "auto-form"]
+	path = auto-form
+	url = https://github.com/vantezzen/auto-form.git
+[submodule "carbon"]
+	path = carbon
+	url = https://github.com/carbon-design-system/carbon.git
+[submodule "cloudscape"]
+	path = cloudscape
+	url = https://github.com/cloudscape-design/components.git
+[submodule "fluentui"]
+	path = fluentui
+	url = https://github.com/microsoft/fluentui.git
+[submodule "humanizer"]
+	path = humanizer
+	url = https://github.com/blader/humanizer.git
+[submodule "material-ui"]
+	path = material-ui
+	url = https://github.com/mui/material-ui.git
+[submodule "onlook"]
+	path = onlook
+	url = https://github.com/onlook-dev/onlook.git
+[submodule "react-hook-form"]
+	path = react-hook-form
+	url = https://github.com/react-hook-form/react-hook-form.git
+[submodule "remotion"]
+	path = remotion
+	url = https://github.com/remotion-dev/remotion.git
+[submodule "scroll-craft"]
+	path = scroll-craft
+	url = https://github.com/nateherkai/scroll-craft.git
+[submodule "shadcn-ui"]
+	path = shadcn-ui
+	url = https://github.com/shadcn-ui/ui.git
