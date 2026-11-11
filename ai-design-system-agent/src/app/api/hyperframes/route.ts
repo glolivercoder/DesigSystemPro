@@ -40,3 +40,4 @@ export async function GET() {
     presets: ["viral-hook", "editorial", "ecommerce", "minimal"],
   });
 }
+
