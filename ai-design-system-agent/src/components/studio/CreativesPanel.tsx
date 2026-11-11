@@ -17,6 +17,19 @@ import {
   type CanvaTemplatePreset,
 } from "@/lib/canva-engine";
 import { buildHyperframesProject, type MotionStylePreset } from "@/lib/hyperframes";
+import {
+  BRAZILIAN_COMMERCIAL_DATES,
+  PAYDAY_SPIKE_TRIGGERS,
+  INITIAL_CLIENTS_CRM,
+  INITIAL_SCHEDULED_CAMPAIGNS,
+  generateGoogleCalendarIcs,
+  getPlatformPeakTime,
+  type ClientBirthday,
+  type CommercialHoliday,
+  type PaydaySpikeTrigger,
+  type ScheduledPostItem,
+  type SocialPlatform,
+} from "@/lib/smart-scheduler";
 
 interface Props {
   category: Category;
@@ -35,7 +48,8 @@ type DockTab =
   | "formats"
   | "figma-penpot"
   | "social-tools"
-  | "hyperframes";
+  | "hyperframes"
+  | "smart-schedule";
 
 export default function CreativesPanel({ category, designSystem, onNotify }: Props) {
   // Active Dock Navigation item
@@ -88,6 +102,12 @@ export default function CreativesPanel({ category, designSystem, onNotify }: Pro
   const [motionDuration, setMotionDuration] = useState(8);
   const [showMotionPlayer, setShowMotionPlayer] = useState(false);
   const [motionKey, setMotionKey] = useState(0);
+
+  // Smart Scheduling State (Datas Comerciais, Payday Spikes, CRM Aniversários)
+  const [schedulePlatform, setSchedulePlatform] = useState<SocialPlatform>("all");
+  const [scheduleSubTab, setScheduleSubTab] = useState<"payday" | "birthdays" | "loyalty" | "commercial" | "queue">("payday");
+  const [campaignsQueue, setCampaignsQueue] = useState<ScheduledPostItem[]>(INITIAL_SCHEDULED_CAMPAIGNS);
+  const [clientsList, setClientsList] = useState<ClientBirthday[]>(INITIAL_CLIENTS_CRM);
 
   // Canvas DOM container ref for zoom calculation & download
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -444,6 +464,395 @@ export default function CreativesPanel({ category, designSystem, onNotify }: Pro
     onNotify(`Arte exportada em alta definição (${activeFormat.width}×${activeFormat.height}px)!`);
   };
 
+  // Load Payday Campaign directly into the active Canvas
+  const handleLoadPaydayIntoCanvas = (trigger: PaydaySpikeTrigger) => {
+    setProjectTitle(`${trigger.name} · ${designSystem.name}`);
+    const newPage: CanvasPage = {
+      id: `payday-page-${Date.now()}`,
+      title: trigger.name,
+      bgType: "gradient",
+      bgColor: "#090d16",
+      bgGradient: "linear-gradient(135deg, #090d16 0%, #1e1b4b 100%)",
+      elements: [
+        {
+          id: `pd-badge-${Date.now()}`,
+          type: "badge",
+          name: "Selo de Pagamento",
+          x: 80,
+          y: 80,
+          width: 480,
+          height: 50,
+          badgeBg: "#eab308",
+          badgeColor: "#000",
+          text: `💰 GATILHO DIA ${trigger.dayOfMonth} · ${trigger.urgencyLevel.toUpperCase()}`,
+          fontSize: 18,
+          fontWeight: "900",
+          borderRadius: 99,
+        },
+        {
+          id: `pd-title-${Date.now()}`,
+          type: "heading",
+          name: "Título Payday",
+          x: 80,
+          y: 160,
+          width: 920,
+          height: 240,
+          text: trigger.name.toUpperCase(),
+          fontSize: 62,
+          fontWeight: "900",
+          color: "#ffffff",
+          lineHeight: 1.1,
+        },
+        {
+          id: `pd-card-${Date.now()}`,
+          type: "shape",
+          name: "Card de Oferta",
+          x: 80,
+          y: 430,
+          width: 920,
+          height: 340,
+          shapeType: "card",
+          fill: "#1e1327",
+          stroke: "#eab308",
+          strokeWidth: 2,
+          borderRadius: 20,
+        },
+        {
+          id: `pd-offer-text-${Date.now()}`,
+          type: "text",
+          name: "Texto da Oferta",
+          x: 120,
+          y: 470,
+          width: 840,
+          height: 260,
+          text: `${trigger.recommendedOffer}\n\nEstratégia: ${trigger.strategy}`,
+          fontSize: 28,
+          fontWeight: "700",
+          color: "#fef08a",
+          lineHeight: 1.4,
+        },
+        {
+          id: `pd-cta-btn-${Date.now()}`,
+          type: "button",
+          name: "Botão Comprar Agora",
+          x: 140,
+          y: 830,
+          width: 800,
+          height: 90,
+          text: "Garantir Oferta com Desconto no PIX →",
+          fontSize: 28,
+          fontWeight: "900",
+          badgeBg: "#22c55e",
+          badgeColor: "#052e16",
+          borderRadius: 20,
+        },
+      ],
+    };
+
+    setPages([newPage, ...pages]);
+    setActivePageIndex(0);
+    setSelectedElementId(newPage.elements[1].id);
+    onNotify(`Campanha '${trigger.name}' carregada com sucesso no Canvas!`);
+  };
+
+  // Load Client Birthday Campaign into the active Canvas
+  const handleLoadBirthdayIntoCanvas = (client: ClientBirthday) => {
+    setProjectTitle(`Aniversário de ${client.name}`);
+    const newPage: CanvasPage = {
+      id: `bday-page-${Date.now()}`,
+      title: `Parabéns ${client.name}`,
+      bgType: "gradient",
+      bgColor: "#180d24",
+      bgGradient: "linear-gradient(135deg, #180d24 0%, #3b0764 100%)",
+      elements: [
+        {
+          id: `bday-ribbon-${Date.now()}`,
+          type: "badge",
+          name: "Faixa Parabéns",
+          x: 140,
+          y: 90,
+          width: 800,
+          height: 60,
+          badgeBg: "#ec4899",
+          badgeColor: "#ffffff",
+          text: "🎂 HOJE O DIA É ESPECIAL! 🎂",
+          fontSize: 24,
+          fontWeight: "900",
+          borderRadius: 99,
+        },
+        {
+          id: `bday-name-${Date.now()}`,
+          type: "heading",
+          name: "Nome do Aniversariante",
+          x: 80,
+          y: 190,
+          width: 920,
+          height: 180,
+          text: `FELIZ ANIVERSÁRIO,\n${client.name.toUpperCase()}!`,
+          fontSize: 64,
+          fontWeight: "900",
+          color: "#ffffff",
+          textAlign: "center",
+        },
+        {
+          id: `bday-coupon-${Date.now()}`,
+          type: "price-tag",
+          name: "Cupom Exclusivo",
+          x: 190,
+          y: 420,
+          width: 700,
+          height: 190,
+          shapeType: "card",
+          badgeBg: "#f43f5e",
+          badgeColor: "#ffffff",
+          text: `Seu Presente Exclusivo:\nCUPOM: ${client.customDiscountCode}\n(25% OFF + ${client.suggestedGift})`,
+          fontSize: 26,
+          borderRadius: 24,
+        },
+        {
+          id: `bday-desc-${Date.now()}`,
+          type: "text",
+          name: "Mensagem Afetiva",
+          x: 100,
+          y: 670,
+          width: 880,
+          height: 120,
+          text: "Queremos celebrar essa data com você! Válido para qualquer compra realizada esta semana na nossa loja.",
+          fontSize: 26,
+          fontWeight: "600",
+          color: "#fbcfe8",
+          textAlign: "center",
+          lineHeight: 1.4,
+        },
+        {
+          id: `bday-cta-${Date.now()}`,
+          type: "button",
+          name: "Botão Resgatar Presente",
+          x: 240,
+          y: 840,
+          width: 600,
+          height: 80,
+          text: "🎁 Resgatar Meu Presente Agora",
+          fontSize: 26,
+          fontWeight: "900",
+          badgeBg: "#ffffff",
+          badgeColor: "#831843",
+          borderRadius: 16,
+        },
+      ],
+    };
+
+    setPages([newPage, ...pages]);
+    setActivePageIndex(0);
+    setSelectedElementId(newPage.elements[1].id);
+    onNotify(`Arte de aniversário para ${client.name} gerada no Canvas!`);
+  };
+
+  // Load Loyalty Anniversary Campaign into Canvas
+  const handleLoadLoyaltyIntoCanvas = (client: ClientBirthday) => {
+    setProjectTitle(`Fidelidade ${client.yearsWithStore} Anos · ${client.name}`);
+    const newPage: CanvasPage = {
+      id: `loyalty-page-${Date.now()}`,
+      title: `Parceria ${client.name}`,
+      bgType: "gradient",
+      bgColor: "#09101d",
+      bgGradient: "linear-gradient(135deg, #09101d 0%, #172554 100%)",
+      elements: [
+        {
+          id: `ly-tag-${Date.now()}`,
+          type: "badge",
+          name: "Tag Fidelidade",
+          x: 100,
+          y: 90,
+          width: 880,
+          height: 60,
+          badgeBg: "#3b82f6",
+          badgeColor: "#ffffff",
+          text: "💎 ANIVERSÁRIO DE PARCERIA & CLIENTE VIP 💎",
+          fontSize: 22,
+          fontWeight: "900",
+          borderRadius: 99,
+        },
+        {
+          id: `ly-title-${Date.now()}`,
+          type: "heading",
+          name: "Título Anos Juntos",
+          x: 80,
+          y: 200,
+          width: 920,
+          height: 160,
+          text: `${client.yearsWithStore} ANOS DE CONFIANÇA!`,
+          fontSize: 66,
+          fontWeight: "900",
+          color: "#93c5fd",
+          textAlign: "center",
+        },
+        {
+          id: `ly-body-${Date.now()}`,
+          type: "text",
+          name: "Texto Agradecimento",
+          x: 100,
+          y: 400,
+          width: 880,
+          height: 140,
+          text: `Olá ${client.name}, há exatos ${client.yearsWithStore} ano(s) você fez seu primeiro pedido com a gente. Para retribuir sua preferência, preparamos um brinde exclusivo:`,
+          fontSize: 26,
+          fontWeight: "600",
+          color: "#e2e8f0",
+          textAlign: "center",
+          lineHeight: 1.4,
+        },
+        {
+          id: `ly-card-${Date.now()}`,
+          type: "price-tag",
+          name: "Voucher Cashback",
+          x: 190,
+          y: 580,
+          width: 700,
+          height: 170,
+          badgeBg: "#1d4ed8",
+          badgeColor: "#ffffff",
+          text: `CUPOM VIP: ${client.customDiscountCode}\nCASHBACK EM DOBRO + ${client.suggestedGift.toUpperCase()}`,
+          fontSize: 24,
+          borderRadius: 20,
+        },
+        {
+          id: `ly-cta-${Date.now()}`,
+          type: "button",
+          name: "Botão Ativar Benefício",
+          x: 240,
+          y: 820,
+          width: 600,
+          height: 80,
+          text: "Ativar Meu Benefício de Fidelidade →",
+          fontSize: 24,
+          fontWeight: "900",
+          badgeBg: "#38bdf8",
+          badgeColor: "#082f49",
+          borderRadius: 16,
+        },
+      ],
+    };
+
+    setPages([newPage, ...pages]);
+    setActivePageIndex(0);
+    setSelectedElementId(newPage.elements[1].id);
+    onNotify(`Criativo de Aniversário de Fidelidade para ${client.name} carregado no Canvas!`);
+  };
+
+  // Load Brazilian Commercial Date into Canvas
+  const handleLoadCommercialIntoCanvas = (holiday: CommercialHoliday) => {
+    setProjectTitle(`${holiday.title} · ${designSystem.name}`);
+    const newPage: CanvasPage = {
+      id: `holiday-page-${Date.now()}`,
+      title: holiday.title,
+      bgType: "gradient",
+      bgColor: "#0f172a",
+      bgGradient: "linear-gradient(135deg, #090d16 0%, #111827 100%)",
+      elements: [
+        {
+          id: `hol-tag-${Date.now()}`,
+          type: "badge",
+          name: "Tag Data Especial",
+          x: 80,
+          y: 90,
+          width: 920,
+          height: 60,
+          badgeBg: holiday.badgeColor,
+          badgeColor: "#ffffff",
+          text: `🇧🇷 DATA COMERCIAL · ${holiday.title.toUpperCase()} (${holiday.dateStr})`,
+          fontSize: 22,
+          fontWeight: "900",
+          borderRadius: 99,
+        },
+        {
+          id: `hol-title-${Date.now()}`,
+          type: "heading",
+          name: "Título da Campanha",
+          x: 80,
+          y: 190,
+          width: 920,
+          height: 200,
+          text: holiday.theme.toUpperCase(),
+          fontSize: 60,
+          fontWeight: "900",
+          color: "#ffffff",
+          textAlign: "center",
+          lineHeight: 1.15,
+        },
+        {
+          id: `hol-offer-${Date.now()}`,
+          type: "price-tag",
+          name: "Oferta Especial",
+          x: 140,
+          y: 450,
+          width: 800,
+          height: 180,
+          badgeBg: holiday.badgeColor,
+          badgeColor: "#ffffff",
+          text: `OFERTA ESPECIAL DE ${holiday.title.toUpperCase()}:\n${holiday.suggestedOffer}`,
+          fontSize: 28,
+          borderRadius: 24,
+        },
+        {
+          id: `hol-sub-${Date.now()}`,
+          type: "text",
+          name: "Público e Antecedência",
+          x: 100,
+          y: 690,
+          width: 880,
+          height: 90,
+          text: `Campanha ativa com ${holiday.advanceNoticeDays} dias de antecedência para garantir entrega no prazo!`,
+          fontSize: 24,
+          fontWeight: "600",
+          color: "#94a3b8",
+          textAlign: "center",
+        },
+        {
+          id: `hol-cta-${Date.now()}`,
+          type: "button",
+          name: "Botão CTA Sazonal",
+          x: 180,
+          y: 840,
+          width: 720,
+          height: 85,
+          text: "Comprar Presente com Envio Garantido 🎁",
+          fontSize: 28,
+          fontWeight: "900",
+          badgeBg: "#ffffff",
+          badgeColor: "#0f172a",
+          borderRadius: 20,
+        },
+      ],
+    };
+
+    setPages([newPage, ...pages]);
+    setActivePageIndex(0);
+    setSelectedElementId(newPage.elements[1].id);
+    onNotify(`Campanha sazonal de '${holiday.title}' carregada no Canvas!`);
+  };
+
+  // Export to Google Calendar (.ics)
+  const handleExportGoogleCalendar = () => {
+    const icsContent = generateGoogleCalendarIcs(campaignsQueue);
+    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `campanhas_agendadas_designsystempro.ics`;
+    link.click();
+    URL.revokeObjectURL(url);
+    onNotify("Arquivo de calendário (.ics) baixado! Importe no Google Calendar com 1 clique.");
+  };
+
+  // Dispatch campaign post via Postiz API simulation
+  const handleDispatchPostiz = (campId: string) => {
+    setCampaignsQueue((prev) =>
+      prev.map((c) => (c.id === campId ? { ...c, status: "published" } : c))
+    );
+    onNotify(`Campanha enviada para a fila de publicação multi-canal do Postiz com sucesso!`);
+  };
+
   // Convert and Import Penpot/Figma payload
   const handleConvertImport = () => {
     if (!importText.trim()) return;
@@ -619,6 +1028,31 @@ export default function CreativesPanel({ category, designSystem, onNotify }: Pro
           >
             <span>🎬</span>
             <span>Vídeo HyperFrames</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveDock("smart-schedule");
+              setIsDrawerOpen(true);
+              onNotify("Aba Agendamento 📅 aberta! Gerencie datas comerciais, picos de pagamento e aniversários.");
+            }}
+            title="Agendamento Inteligente Multi-Rede, Datas Comerciais e CRM"
+            style={{
+              background: "rgba(59, 130, 246, 0.18)",
+              border: "1px solid rgba(59, 130, 246, 0.4)",
+              color: "#60a5fa",
+              padding: "6px 14px",
+              borderRadius: 20,
+              fontSize: 12,
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              cursor: "pointer",
+            }}
+          >
+            <span>Agendamento</span>
+            <span>📅</span>
           </button>
 
           <button
@@ -844,6 +1278,7 @@ export default function CreativesPanel({ category, designSystem, onNotify }: Pro
             { id: "figma-penpot", label: "Figma/Penpot", icon: "🌐" },
             { id: "social-tools", label: "IA Redes", icon: "⚡" },
             { id: "hyperframes", label: "HyperFrames", icon: "🎬" },
+            { id: "smart-schedule", label: "Agendamento 📅", icon: "🗓️" },
           ].map((item) => {
             const isActive = activeDock === item.id;
             return (
@@ -1907,6 +2342,392 @@ export default function CreativesPanel({ category, designSystem, onNotify }: Pro
                     ffmpeg -i video.mp4 -vf "fps=15,scale=480:-1" video.gif
                   </code>
                 </div>
+              </div>
+            )}
+
+            {/* 11. DRAWER: AGENDAMENTO 📅 INTELIGENTE & DATAS COMERCIAIS */}
+            {activeDock === "smart-schedule" && (
+              <div style={{ padding: 16 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <h3 style={{ fontSize: 14, fontWeight: 700, margin: 0, color: "#fff" }}>Agendamento</h3>
+                    <span style={{ fontSize: 16 }}>📅</span>
+                  </div>
+                  <span style={{ fontSize: 10, background: "#3b82f6", color: "#fff", padding: "2px 6px", borderRadius: 4, fontWeight: 800 }}>
+                    MULTI-REDE
+                  </span>
+                </div>
+                <p style={{ fontSize: 11, color: "#94a3b8", margin: "0 0 12px", lineHeight: 1.4 }}>
+                  Disparo automatizado de criativos para picos de pagamento (dias 3, 4, 5 e 20), datas comerciais, aniversários de clientes e tempo de relacionamento com a loja.
+                </p>
+
+                {/* Platform Selector Dropdown */}
+                <div style={{ marginBottom: 12 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "#cbd5e1", display: "block", marginBottom: 4 }}>
+                    Rede Social de Destino (Dropdown):
+                  </label>
+                  <select
+                    value={schedulePlatform}
+                    onChange={(e) => setSchedulePlatform(e.target.value as SocialPlatform)}
+                    style={{
+                      width: "100%",
+                      background: "#0e1117",
+                      border: "1px solid rgba(255,255,255,0.15)",
+                      borderRadius: 6,
+                      padding: "8px 10px",
+                      color: "#fff",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      outline: "none",
+                    }}
+                  >
+                    <option value="all">🌐 Todas as Redes (Multi-Disparo Automático)</option>
+                    <option value="instagram">📸 Instagram (Reels & Feed)</option>
+                    <option value="tiktok">📱 TikTok (Para Você - 9:16)</option>
+                    <option value="youtube_shorts">⚡ YouTube Shorts (Vertical)</option>
+                    <option value="facebook">📘 Facebook (Feed & Anúncios)</option>
+                  </select>
+
+                  {/* Calculated Peak Time Indicator */}
+                  <div style={{ background: "rgba(59, 130, 246, 0.12)", border: "1px solid rgba(59, 130, 246, 0.3)", borderRadius: 6, padding: "6px 10px", marginTop: 6, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 10.5, color: "#93c5fd" }}>
+                      ⏰ Pico Calculado: <strong>{getPlatformPeakTime(schedulePlatform).time}</strong>
+                    </span>
+                    <span style={{ fontSize: 10, color: "#22c55e", fontWeight: 800 }}>
+                      ★ {getPlatformPeakTime(schedulePlatform).engagementScore}% Engajamento
+                    </span>
+                  </div>
+                </div>
+
+                {/* Sub-Tabs: Payday, Birthdays, Loyalty, Commercial, Queue */}
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 14 }}>
+                  {[
+                    { id: "payday", label: "💰 Salário/Pico" },
+                    { id: "birthdays", label: "🎂 Aniversários" },
+                    { id: "loyalty", label: "🤝 Fidelidade" },
+                    { id: "commercial", label: "🇧🇷 Comerciais" },
+                    { id: "queue", label: `📋 Fila (${campaignsQueue.length})` },
+                  ].map((subTab) => (
+                    <button
+                      key={subTab.id}
+                      onClick={() => setScheduleSubTab(subTab.id as any)}
+                      style={{
+                        background: scheduleSubTab === subTab.id ? "#3b82f6" : "#212735",
+                        border: "none",
+                        color: "#fff",
+                        padding: "5px 8px",
+                        borderRadius: 6,
+                        fontSize: 10.5,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {subTab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* 1. SUB-TAB: PAYDAY SPIKE (Dias 3, 4, 5 e 20) */}
+                {scheduleSubTab === "payday" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div style={{ background: "rgba(234, 179, 8, 0.1)", border: "1px solid rgba(234, 179, 8, 0.3)", borderRadius: 8, padding: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: "#facc15" }}>Gatilho Tático de Liquidez (Payday Spike)</span>
+                      <p style={{ fontSize: 10.5, color: "#e2e8f0", margin: "4px 0 0", lineHeight: 1.3 }}>
+                        Aproveite os dias de maior poder de compra pós-salário e adiantamento salarial brasileiro.
+                      </p>
+                    </div>
+
+                    {PAYDAY_SPIKE_TRIGGERS.map((trigger) => (
+                      <div
+                        key={trigger.id}
+                        style={{
+                          background: "#212735",
+                          border: trigger.dayOfMonth === 5 ? "1px solid #eab308" : "1px solid rgba(255,255,255,0.08)",
+                          borderRadius: 8,
+                          padding: 10,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 6,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: trigger.dayOfMonth === 5 ? "#eab308" : "#fff" }}>
+                            {trigger.name}
+                          </span>
+                          <span style={{ fontSize: 9.5, background: trigger.urgencyLevel === "máxima" ? "#ef4444" : "#475569", color: "#fff", padding: "1px 6px", borderRadius: 4, fontWeight: 800, textTransform: "uppercase" }}>
+                            {trigger.urgencyLevel}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: 10.5, color: "#94a3b8", margin: 0 }}>
+                          <strong>Público:</strong> {trigger.targetGroup}
+                        </p>
+                        <p style={{ fontSize: 10.5, color: "#cbd5e1", margin: 0 }}>
+                          <strong>Oferta:</strong> {trigger.recommendedOffer}
+                        </p>
+
+                        <button
+                          onClick={() => handleLoadPaydayIntoCanvas(trigger)}
+                          style={{
+                            background: "linear-gradient(135deg, #eab308 0%, #ca8a04 100%)",
+                            border: "none",
+                            color: "#000",
+                            padding: "6px 10px",
+                            borderRadius: 6,
+                            fontSize: 11,
+                            fontWeight: 800,
+                            cursor: "pointer",
+                            marginTop: 4,
+                            textAlign: "center",
+                          }}
+                        >
+                          🎨 Carregar Criativo de Vendas no Canvas
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 2. SUB-TAB: ANIVERSÁRIOS DE CLIENTES (CRM) */}
+                {scheduleSubTab === "birthdays" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div style={{ background: "rgba(236, 72, 153, 0.1)", border: "1px solid rgba(236, 72, 153, 0.3)", borderRadius: 8, padding: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: "#f472b6" }}>Gatilho CRM de Aniversariantes</span>
+                      <p style={{ fontSize: 10.5, color: "#e2e8f0", margin: "4px 0 0", lineHeight: 1.3 }}>
+                        Parabenize clientes com cupom exclusivo e presente surpresa para gerar fidelidade e recompra imediata.
+                      </p>
+                    </div>
+
+                    {INITIAL_CLIENTS_CRM.map((client) => (
+                      <div
+                        key={client.id}
+                        style={{
+                          background: "#212735",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          borderRadius: 8,
+                          padding: 10,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 6,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: "#fff" }}>
+                            🎂 {client.name} ({client.birthDate})
+                          </span>
+                          <span style={{ fontSize: 9.5, background: client.relationshipType === "vip" ? "#ec4899" : "#3b82f6", color: "#fff", padding: "1px 6px", borderRadius: 4, fontWeight: 800, textTransform: "uppercase" }}>
+                            {client.relationshipType}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: 10.5, color: "#cbd5e1", margin: 0 }}>
+                          <strong>Cupom:</strong> <span style={{ color: "#f472b6", fontWeight: 700 }}>{client.customDiscountCode}</span> · <strong>Brinde:</strong> {client.suggestedGift}
+                        </p>
+                        <button
+                          onClick={() => handleLoadBirthdayIntoCanvas(client)}
+                          style={{
+                            background: "#ec4899",
+                            border: "none",
+                            color: "#fff",
+                            padding: "6px 10px",
+                            borderRadius: 6,
+                            fontSize: 11,
+                            fontWeight: 800,
+                            cursor: "pointer",
+                            marginTop: 2,
+                            textAlign: "center",
+                          }}
+                        >
+                          🎁 Criar Post de Parabéns com Desconto
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 3. SUB-TAB: ANIVERSÁRIO DE RELACIONAMENTO COM A LOJA */}
+                {scheduleSubTab === "loyalty" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div style={{ background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.3)", borderRadius: 8, padding: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: "#60a5fa" }}>Aniversário de Parceria & Loja</span>
+                      <p style={{ fontSize: 10.5, color: "#e2e8f0", margin: "4px 0 0", lineHeight: 1.3 }}>
+                        Comemoração de 1, 2 ou 3 anos da primeira compra do cliente, com brinde e cashback duplo.
+                      </p>
+                    </div>
+
+                    {INITIAL_CLIENTS_CRM.map((client) => (
+                      <div
+                        key={client.id}
+                        style={{
+                          background: "#212735",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          borderRadius: 8,
+                          padding: 10,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 6,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: "#93c5fd" }}>
+                            🤝 {client.name} · {client.yearsWithStore} ano(s) de parceria
+                          </span>
+                        </div>
+                        <p style={{ fontSize: 10.5, color: "#cbd5e1", margin: 0 }}>
+                          Primeira compra: {client.anniversaryWithStore} · Cupom: <strong>{client.customDiscountCode}</strong>
+                        </p>
+                        <button
+                          onClick={() => handleLoadLoyaltyIntoCanvas(client)}
+                          style={{
+                            background: "#2563eb",
+                            border: "none",
+                            color: "#fff",
+                            padding: "6px 10px",
+                            borderRadius: 6,
+                            fontSize: 11,
+                            fontWeight: 800,
+                            cursor: "pointer",
+                            marginTop: 2,
+                            textAlign: "center",
+                          }}
+                        >
+                          💎 Gerar Post de Fidelidade & Cashback
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 4. SUB-TAB: DATAS COMERCIAIS BRASILEIRAS */}
+                {scheduleSubTab === "commercial" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div style={{ background: "rgba(16, 185, 129, 0.1)", border: "1px solid rgba(16, 185, 129, 0.3)", borderRadius: 8, padding: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: "#34d399" }}>Calendário Comercial Brasileiro</span>
+                      <p style={{ fontSize: 10.5, color: "#e2e8f0", margin: "4px 0 0", lineHeight: 1.3 }}>
+                        Feriados e datas comemorativas nacionais pré-mapeadas com sugestão de oferta e antecedência.
+                      </p>
+                    </div>
+
+                    {BRAZILIAN_COMMERCIAL_DATES.map((holiday) => (
+                      <div
+                        key={holiday.id}
+                        style={{
+                          background: "#212735",
+                          border: `1px solid ${holiday.badgeColor}40`,
+                          borderRadius: 8,
+                          padding: 10,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 6,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: "#fff" }}>
+                            🇧🇷 {holiday.title}
+                          </span>
+                          <span style={{ fontSize: 10, color: holiday.badgeColor, fontWeight: 700 }}>
+                            {holiday.dateStr}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: 10.5, color: "#94a3b8", margin: 0 }}>
+                          {holiday.theme}
+                        </p>
+                        <p style={{ fontSize: 10.5, color: "#cbd5e1", margin: 0 }}>
+                          <strong>Oferta:</strong> {holiday.suggestedOffer}
+                        </p>
+                        <button
+                          onClick={() => handleLoadCommercialIntoCanvas(holiday)}
+                          style={{
+                            background: holiday.badgeColor,
+                            border: "none",
+                            color: "#fff",
+                            padding: "6px 10px",
+                            borderRadius: 6,
+                            fontSize: 11,
+                            fontWeight: 800,
+                            cursor: "pointer",
+                            marginTop: 2,
+                            textAlign: "center",
+                          }}
+                        >
+                          🎨 Carregar Campanha Sazonal no Canvas
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 5. SUB-TAB: FILA DE PUBLICAÇÕES AGENDADAS & INTEGRAÇÕES */}
+                {scheduleSubTab === "queue" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {/* Top Actions: Google Calendar & Postiz */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                      <button
+                        onClick={handleExportGoogleCalendar}
+                        style={{
+                          background: "#16a34a",
+                          border: "none",
+                          color: "#fff",
+                          padding: "8px 6px",
+                          borderRadius: 6,
+                          fontSize: 10.5,
+                          fontWeight: 800,
+                          cursor: "pointer",
+                          textAlign: "center",
+                        }}
+                      >
+                        📅 Google Calendar (.ics)
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          campaignsQueue.forEach((c) => handleDispatchPostiz(c.id));
+                        }}
+                        style={{
+                          background: "#7d2ae8",
+                          border: "none",
+                          color: "#fff",
+                          padding: "8px 6px",
+                          borderRadius: 6,
+                          fontSize: 10.5,
+                          fontWeight: 800,
+                          cursor: "pointer",
+                          textAlign: "center",
+                        }}
+                      >
+                        🚀 Despachar Postiz API
+                      </button>
+                    </div>
+
+                    {campaignsQueue.map((camp) => (
+                      <div
+                        key={camp.id}
+                        style={{
+                          background: "#212735",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          borderRadius: 8,
+                          padding: 10,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 6,
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontSize: 11.5, fontWeight: 700, color: "#fff" }}>
+                            {camp.title}
+                          </span>
+                          <span style={{ fontSize: 9.5, background: camp.status === "published" ? "#10b981" : "#3b82f6", color: "#fff", padding: "1px 6px", borderRadius: 4, fontWeight: 800 }}>
+                            {camp.status === "published" ? "PUBLICADO" : "AGENDADO"}
+                          </span>
+                        </div>
+                        <p style={{ fontSize: 10.5, color: "#94a3b8", margin: 0 }}>
+                          ⏰ {camp.scheduledDate} às {camp.scheduledTime} · Rede: <strong>{camp.platform.toUpperCase()}</strong> ({camp.mediaType})
+                        </p>
+                        <p style={{ fontSize: 10, color: "#cbd5e1", margin: 0, fontStyle: "italic", maxHeight: 40, overflow: "hidden", textOverflow: "ellipsis" }}>
+                          "{camp.caption}"
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </aside>
