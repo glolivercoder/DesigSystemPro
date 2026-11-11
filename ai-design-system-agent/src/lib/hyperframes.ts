@@ -98,28 +98,82 @@ export function buildHyperframesProject(config: HyperframesConfig): HyperframesP
   });
 
   const css = `
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 0; background: #000000; display: grid; place-items: center; min-height: 100vh; overflow: hidden; font-family: 'Inter', -apple-system, sans-serif; }
-    .hf-viewport { width: ${width}px; height: ${height}px; position: relative; overflow: hidden; background: ${config.bgGradient || config.bgColor || "#ffffff"}; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .hf-scaler {
+      width: ${width}px;
+      height: ${height}px;
+      position: absolute;
+      transform-origin: center center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      will-change: transform;
+    }
+    .hf-viewport {
+      width: ${width}px;
+      height: ${height}px;
+      position: relative;
+      overflow: hidden;
+      background: ${config.bgGradient || config.bgColor || "#ffffff"};
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    }
   `;
 
   const fullHtmlDoc = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HyperFrames Video · ${config.title}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap">
   <style>
 ${css}
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </head>
 <body>
-  <div class="hf-viewport">
+  <div class="hf-scaler" id="hfScaler">
+    <div class="hf-viewport">
 ${elementsHtml}
+    </div>
   </div>
 
   <script>
+    function updateScale() {
+      const scaler = document.getElementById("hfScaler");
+      if (!scaler) return;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      if (!vw || !vh) return;
+      const scale = Math.min(vw / ${width}, vh / ${height});
+      scaler.style.transform = "scale(" + scale + ")";
+    }
+
+    window.addEventListener("resize", updateScale);
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", updateScale);
+    } else {
+      updateScale();
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
+      updateScale();
 ${gsapCode}
     });
   </script>

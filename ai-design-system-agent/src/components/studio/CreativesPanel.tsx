@@ -3695,21 +3695,55 @@ export default function CreativesPanel({ category, designSystem, onNotify }: Pro
               </div>
 
               {/* Player Stage with Iframe */}
-              <div style={{ flex: 1, display: "grid", placeItems: "center", padding: 20, overflow: "auto" }}>
-                <iframe
-                  key={motionKey}
-                  srcDoc={hyperframesProject.fullHtmlDoc}
-                  title="HyperFrames Motion Preview"
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 24,
+                  overflow: "hidden",
+                  background: "#080a0f",
+                  position: "relative",
+                }}
+              >
+                <div
                   style={{
-                    width: activeFormat.width * 0.45,
-                    height: activeFormat.height * 0.45,
-                    border: "none",
-                    borderRadius: 8,
-                    boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
-                    background: "#000",
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
-                  sandbox="allow-scripts"
-                />
+                >
+                  <iframe
+                    key={motionKey}
+                    srcDoc={hyperframesProject.fullHtmlDoc}
+                    title="HyperFrames Motion Preview"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      maxWidth:
+                        activeFormat.width > activeFormat.height
+                          ? 680
+                          : activeFormat.width === activeFormat.height
+                          ? 520
+                          : 380,
+                      maxHeight:
+                        activeFormat.height > activeFormat.width
+                          ? 680
+                          : activeFormat.width === activeFormat.height
+                          ? 520
+                          : 440,
+                      aspectRatio: `${activeFormat.width} / ${activeFormat.height}`,
+                      border: "1px solid rgba(255, 255, 255, 0.15)",
+                      borderRadius: 10,
+                      boxShadow: "0 25px 60px rgba(0,0,0,0.9), 0 0 35px rgba(239,68,68,0.15)",
+                      background: "#000000",
+                    }}
+                    sandbox="allow-scripts"
+                  />
+                </div>
               </div>
 
               {/* Player Bottom Info */}
