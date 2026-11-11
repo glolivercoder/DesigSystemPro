@@ -165,6 +165,45 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const clientsBirthdays = pgTable("clients_birthdays", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  phone: text("phone").notNull().default(""),
+  email: text("email").notNull().default(""),
+  birthDate: text("birth_date").notNull(), // MM-DD or YYYY-MM-DD
+  relationshipType: text("relationship_type").notNull().default("client"), // client | vip | partner
+  anniversaryWithStore: text("anniversary_with_store").notNull().default(""), // YYYY-MM-DD
+  customDiscountCode: text("custom_discount_code").notNull().default(""),
+  lastGreetedYear: integer("last_greeted_year").notNull().default(0),
+});
+
+export const commercialDates = pgTable("commercial_dates", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  ruleType: text("rule_type").notNull(), // fixed_date | nth_weekday | monthly_payday
+  month: integer("month").notNull(), // 1 - 12 (0 for monthly)
+  day: integer("day").notNull(), // 1 - 31
+  advanceDaysNotice: integer("advance_days_notice").notNull().default(2),
+  campaignTheme: text("campaign_theme").notNull(),
+  discountOffer: text("discount_offer").notNull().default(""),
+  active: boolean("active").notNull().default(true),
+});
+
+export const scheduledCampaignPosts = pgTable("scheduled_campaign_posts", {
+  id: text("id").primaryKey(),
+  campaignType: text("campaign_type").notNull(), // payday_spike | birthday | commercial_date | store_anniversary | custom
+  title: text("title").notNull(),
+  targetPlatform: text("target_platform").notNull().default("all"), // instagram | facebook | tiktok | youtube_shorts | all
+  mediaType: text("media_type").notNull().default("image"), // image | video | gif
+  caption: text("caption").notNull().default(""),
+  discountCode: text("discount_code").notNull().default(""),
+  scheduledFor: text("scheduled_for").notNull(), // ISO Date String
+  peakTimeScore: integer("peak_time_score").notNull().default(90),
+  googleCalendarSynced: boolean("google_calendar_synced").notNull().default(false),
+  postizStatus: text("postiz_status").notNull().default("pending"), // pending | scheduled | published
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type DesignSystemRow = typeof designSystems.$inferSelect;
 export type SkillRow = typeof skills.$inferSelect;
 export type McpRow = typeof mcpServers.$inferSelect;
